@@ -1,0 +1,22 @@
+{
+  "name": "health-tracker-backend",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "server": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "express": "^4.x",
+    "mongoose": "^6.x",
+    "cors": "^2.x",
+    "dotenv": "^16.x",
+    "express-validator": "^7.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
+
+
+
