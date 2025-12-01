@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { postEntry } from '../services/api';
 import { toast } from 'react-toastify';  // assume we install react-toastify
+import { useAuth } from '../contexts/AuthContext';
+import Login from './Login';
+import Register from './Register';
 
 const schema = yup.object().shape({
   water: yup.number().typeError('Water must be a number')
@@ -18,6 +21,8 @@ const schema = yup.object().shape({
 });
 
 const LogForm = ({ onNewEntry }) => {
+  const { user } = useAuth();
+  const [showRegister, setShowRegister] = useState(false);
   const {
     register,
     handleSubmit,
@@ -29,6 +34,21 @@ const LogForm = ({ onNewEntry }) => {
     resolver: yupResolver(schema),
     defaultValues: { water: '', exercise: '', sugar: '' },
   });
+
+  if (!user) {
+    return (
+      <div>
+        <p className="mb-2">You must sign in to save entries.</p>
+        <div className="d-flex gap-2">
+          <Login onSuccess={() => window.location.reload()} />
+          <button className="btn btn-link" onClick={() => setShowRegister(s => !s)}>
+            {showRegister ? 'Hide' : 'Create account'}
+          </button>
+        </div>
+        {showRegister && <Register onSuccess={() => window.location.reload()} />}
+      </div>
+    );
+  }
 
   const onSubmit = async (data) => {
     try {

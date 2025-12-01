@@ -2,6 +2,7 @@ const express = require('express');
 const { body, validationResult } = require('express-validator');
 const router = express.Router();
 const controller = require('../controllers/entryController');
+const auth = require('../middleware/auth');
 
 // Validation rules for entry creation
 const entryValidationRules = [
@@ -25,8 +26,8 @@ router.post('/', entryValidationRules, (req, res, next) => {
     return res.status(400).json({ errors: errors.array() });
   }
   next();
-}, controller.createEntry);
+}, auth.verifyToken, controller.createEntry);
 
-router.get('/', controller.getEntries);
+router.get('/', auth.verifyToken, controller.getEntries);
 
 module.exports = router;

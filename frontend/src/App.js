@@ -4,12 +4,16 @@ import RecentEntriesTable from './components/RecentEntriesTable';
 import ChartsPanel from './components/ChartsPanel';
 import { fetchEntries } from './services/api';
 import {ClipLoader} from 'react-spinners'; // assume spinner lib
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import Login from './components/Login';
+import Register from './components/Register';
 
 function App() {
   const [entries, setEntries] = useState([]);
   const [loadingEntries, setLoadingEntries] = useState(false);
   const [loadError, setLoadError] = useState('');
   const [filterDays, setFilterDays] = useState(7);
+  const { user, loading: authLoading } = useAuth();
 
   const loadEntries = async () => {
     setLoadError('');
@@ -26,8 +30,14 @@ function App() {
   };
 
   useEffect(() => {
+    // only load entries after auth has resolved and a user exists
+    if (authLoading) return;
+    if (!user) {
+      setEntries([]);
+      return;
+    }
     loadEntries();
-  }, []);
+  }, [authLoading, user]);
 
   const filteredEntries = entries.filter(e => {
     const entryDate = new Date(e.createdAt);
@@ -36,7 +46,9 @@ function App() {
   });
 
   return (
+    <AuthProvider>
     <div className="container my-4">
+      <Header />
       <div className="row g-4">
         <div className="col-12 col-lg-5">
           <div className="card shadow-sm">
@@ -87,7 +99,30 @@ function App() {
         </div>
       </div>
     </div>
+    </AuthProvider>
   );
 }
 
 export default App;
+
+function Header() {
+  const { user, logout } = useAuth();
+  return (
+    <div className="d-flex justify-content-between align-items-center mb-3">
+      <h3>My Health Tracker</h3>
+      <div>
+        {user ? (
+          <div className="d-flex align-items-center">
+            <span className="me-3">Signed in as <strong>{user.name || user.email}</strong></span>
+            <button className="btn btn-outline-secondary btn-sm" onClick={logout}>Logout</button>
+          </div>
+        ) : (
+          <div className="d-flex gap-2">
+            <Login />
+            <Register />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
